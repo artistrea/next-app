@@ -1,0 +1,429 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model active_storage_attachments {
+  id                   BigInt               @id @default(autoincrement())
+  name                 String               @db.VarChar
+  record_type          String               @db.VarChar
+  record_id            BigInt
+  blob_id              BigInt
+  created_at           DateTime             @db.Timestamp(6)
+  active_storage_blobs active_storage_blobs @relation(fields: [blob_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rails_c3b3935057")
+
+  @@unique([record_type, record_id, name, blob_id], map: "index_active_storage_attachments_uniqueness")
+  @@index([blob_id], map: "index_active_storage_attachments_on_blob_id")
+}
+
+model active_storage_blobs {
+  id                         BigInt                       @id @default(autoincrement())
+  key                        String                       @unique(map: "index_active_storage_blobs_on_key") @db.VarChar
+  filename                   String                       @db.VarChar
+  content_type               String?                      @db.VarChar
+  metadata                   String?
+  byte_size                  BigInt
+  checksum                   String                       @db.VarChar
+  created_at                 DateTime                     @db.Timestamp(6)
+  active_storage_attachments active_storage_attachments[]
+}
+
+model addresses {
+  id           BigInt     @id @default(autoincrement())
+  cep          String?    @db.VarChar
+  neighborhood String?    @db.VarChar
+  number       Int?
+  street       String?    @db.VarChar
+  city         String?    @db.VarChar
+  state        String?    @db.VarChar
+  created_at   DateTime   @db.Timestamp(6)
+  updated_at   DateTime   @db.Timestamp(6)
+  user_id      BigInt
+  users        users      @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rails_48c9e0c5a2")
+  requests     requests[]
+
+  @@index([user_id], map: "index_addresses_on_user_id")
+}
+
+model admins {
+  id               BigInt             @id @default(autoincrement())
+  user_id          BigInt
+  created_at       DateTime           @db.Timestamp(6)
+  updated_at       DateTime           @db.Timestamp(6)
+  users            users              @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rails_378b9734e4")
+  privilege_admins privilege_admins[]
+
+  @@index([user_id], map: "index_admins_on_user_id")
+}
+
+model ar_internal_metadata {
+  key        String   @id @db.VarChar
+  value      String?  @db.VarChar
+  created_at DateTime @db.Timestamp(6)
+  updated_at DateTime @db.Timestamp(6)
+}
+
+model banners {
+  id         BigInt   @id @default(autoincrement())
+  name       String?  @db.VarChar
+  link       String?  @db.VarChar
+  created_at DateTime @db.Timestamp(6)
+  updated_at DateTime @db.Timestamp(6)
+}
+
+model blogs {
+  id         BigInt    @id @default(autoincrement())
+  title      String?   @db.VarChar
+  content    String?
+  release    DateTime? @db.Date
+  user_id    BigInt
+  created_at DateTime  @db.Timestamp(6)
+  updated_at DateTime  @db.Timestamp(6)
+  video      String?   @db.VarChar
+  users      users     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rails_40ebb3948d")
+
+  @@index([user_id], map: "index_blogs_on_user_id")
+}
+
+model cart_products {
+  id         BigInt   @id @default(autoincrement())
+  cart_id    BigInt
+  product_id BigInt
+  quantity   Int?
+  carts      carts    @relation(fields: [cart_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rails_a4f3e327f3")
+  products   products @relation(fields: [product_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rails_b6ff2a078a")
+
+  @@index([cart_id], map: "index_cart_products_on_cart_id")
+  @@index([product_id], map: "index_cart_products_on_product_id")
+}
+
+model carts {
+  id            BigInt          @id @default(autoincrement())
+  total         Decimal?        @db.Decimal
+  user_id       BigInt
+  created_at    DateTime        @db.Timestamp(6)
+  updated_at    DateTime        @db.Timestamp(6)
+  users         users           @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rails_ea59a35211")
+  cart_products cart_products[]
+
+  @@index([user_id], map: "index_carts_on_user_id")
+}
+
+model categories {
+  id          BigInt     @id @default(autoincrement())
+  name        String?    @db.VarChar
+  description String?
+  created_at  DateTime   @db.Timestamp(6)
+  updated_at  DateTime   @db.Timestamp(6)
+  products    products[]
+}
+
+model chats {
+  id                             BigInt     @id @default(autoincrement())
+  user_id                        BigInt?
+  atendent_id                    BigInt?
+  created_at                     DateTime   @db.Timestamp(6)
+  updated_at                     DateTime   @db.Timestamp(6)
+  users_chats_atendent_idTousers users?     @relation("chats_atendent_idTousers", fields: [atendent_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rails_cb3acbb822")
+  users_chats_user_idTousers     users?     @relation("chats_user_idTousers", fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rails_e555f43151")
+  messages                       messages[]
+
+  @@index([atendent_id], map: "index_chats_on_atendent_id")
+  @@index([user_id], map: "index_chats_on_user_id")
+}
+
+model contacts {
+  id         BigInt   @id @default(autoincrement())
+  name       String?  @db.VarChar
+  email      String?  @db.VarChar
+  subject    String?  @db.VarChar
+  message    String?  @db.VarChar
+  created_at DateTime @db.Timestamp(6)
+  updated_at DateTime @db.Timestamp(6)
+}
+
+model markets {
+  id         BigInt   @id @default(autoincrement())
+  name       String?  @db.VarChar
+  created_at DateTime @db.Timestamp(6)
+  updated_at DateTime @db.Timestamp(6)
+}
+
+model messages {
+  id         BigInt   @id @default(autoincrement())
+  body       String?
+  created_at DateTime @db.Timestamp(6)
+  updated_at DateTime @db.Timestamp(6)
+  user_id    BigInt
+  chat_id    BigInt
+  chats      chats    @relation(fields: [chat_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rails_0f670de7ba")
+  users      users    @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rails_273a25a7a6")
+
+  @@index([chat_id], map: "index_messages_on_chat_id")
+  @@index([user_id], map: "index_messages_on_user_id")
+}
+
+model notifications {
+  id         BigInt   @id @default(autoincrement())
+  text       String?
+  title      String?  @db.VarChar
+  link       String?  @db.VarChar
+  created_at DateTime @db.Timestamp(6)
+  updated_at DateTime @db.Timestamp(6)
+  user_id    BigInt?
+  readed     Boolean? @default(false)
+
+  @@index([user_id], map: "index_notifications_on_user_id")
+}
+
+model privilege_admins {
+  id                 BigInt           @id @default(autoincrement())
+  admin_id           BigInt
+  privilege_level_id BigInt
+  created_at         DateTime         @db.Timestamp(6)
+  updated_at         DateTime         @db.Timestamp(6)
+  admins             admins           @relation(fields: [admin_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rails_924ae81a0b")
+  privilege_levels   privilege_levels @relation(fields: [privilege_level_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rails_c4dc16b315")
+
+  @@index([admin_id], map: "index_privilege_admins_on_admin_id")
+  @@index([privilege_level_id], map: "index_privilege_admins_on_privilege_level_id")
+}
+
+model privilege_levels {
+  id               BigInt             @id @default(autoincrement())
+  title            String?            @db.VarChar
+  description      String?
+  created_at       DateTime           @db.Timestamp(6)
+  updated_at       DateTime           @db.Timestamp(6)
+  privilege_admins privilege_admins[]
+}
+
+model productor_infos {
+  id          BigInt   @id @default(autoincrement())
+  description String?  @db.VarChar
+  status      Int      @default(0)
+  user_id     BigInt
+  created_at  DateTime @db.Timestamp(6)
+  updated_at  DateTime @db.Timestamp(6)
+  users       users    @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rails_807ff9822a")
+
+  @@index([user_id], map: "index_productor_infos_on_user_id")
+}
+
+model productranks {
+  id          BigInt   @id @default(autoincrement())
+  nota        Int?
+  mensagem    String?
+  produto_id  Int?
+  client_id   Int?
+  produtor_id Int?
+  created_at  DateTime @db.Timestamp(6)
+  updated_at  DateTime @db.Timestamp(6)
+}
+
+model products {
+  id               BigInt             @id @default(autoincrement())
+  name             String?            @db.VarChar
+  description      String?
+  stock            Int?
+  price            Int?
+  category_id      BigInt
+  created_at       DateTime           @db.Timestamp(6)
+  updated_at       DateTime           @db.Timestamp(6)
+  user_id          BigInt
+  last_price       Int?
+  use_mass         Boolean?           @default(true)
+  season           Int?
+  users            users              @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rails_dee2631783")
+  categories       categories         @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rails_fb915499a4")
+  cart_products    cart_products[]
+  request_products request_products[]
+  service_products service_products[]
+  suggestions      suggestions[]
+  wish_lists       wish_lists[]
+
+  @@index([category_id], map: "index_products_on_category_id")
+  @@index([user_id], map: "index_products_on_user_id")
+}
+
+model request_products {
+  id         BigInt   @id @default(autoincrement())
+  product_id BigInt
+  request_id BigInt
+  created_at DateTime @db.Timestamp(6)
+  updated_at DateTime @db.Timestamp(6)
+  quantity   Int?
+  requests   requests @relation(fields: [request_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rails_72cac40153")
+  products   products @relation(fields: [product_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rails_cd9e15e6eb")
+
+  @@index([product_id], map: "index_request_products_on_product_id")
+  @@index([request_id], map: "index_request_products_on_request_id")
+}
+
+model requests {
+  id               BigInt             @id @default(autoincrement())
+  total            Float?
+  status           String?            @db.VarChar
+  user_id          BigInt
+  address_id       BigInt
+  created_at       DateTime           @db.Timestamp(6)
+  updated_at       DateTime           @db.Timestamp(6)
+  payment_method   String?            @db.VarChar
+  num_installments Int?
+  total_cents      Int?
+  order_code       String?            @db.VarChar
+  users            users              @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rails_8ead8b1e6b")
+  addresses        addresses          @relation(fields: [address_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rails_90dcc545ca")
+  request_products request_products[]
+
+  @@index([address_id], map: "index_requests_on_address_id")
+  @@index([user_id], map: "index_requests_on_user_id")
+}
+
+model schema_migrations {
+  version String @id @db.VarChar
+}
+
+model service_clients {
+  id         BigInt   @id @default(autoincrement())
+  user_id    BigInt
+  service_id BigInt
+  status     String?  @db.VarChar
+  created_at DateTime @db.Timestamp(6)
+  updated_at DateTime @db.Timestamp(6)
+  users      users    @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rails_2c7d3432ab")
+  services   services @relation(fields: [service_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rails_b38590a748")
+
+  @@index([service_id], map: "index_service_clients_on_service_id")
+  @@index([user_id], map: "index_service_clients_on_user_id")
+}
+
+model service_products {
+  id         BigInt   @id @default(autoincrement())
+  product_id BigInt
+  service_id BigInt
+  created_at DateTime @db.Timestamp(6)
+  updated_at DateTime @db.Timestamp(6)
+  services   services @relation(fields: [service_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rails_166c8305a1")
+  products   products @relation(fields: [product_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rails_be815c6660")
+
+  @@index([product_id], map: "index_service_products_on_product_id")
+  @@index([service_id], map: "index_service_products_on_service_id")
+}
+
+model services {
+  id               BigInt             @id @default(autoincrement())
+  name             String?            @db.VarChar
+  description      String?            @db.VarChar
+  stock            Int?
+  price            Float?
+  created_at       DateTime           @db.Timestamp(6)
+  updated_at       DateTime           @db.Timestamp(6)
+  user_id          BigInt
+  users            users              @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rails_51a813203f")
+  service_clients  service_clients[]
+  service_products service_products[]
+
+  @@index([user_id], map: "index_services_on_user_id")
+}
+
+model suggestions {
+  id         BigInt   @id @default(autoincrement())
+  user_id    BigInt
+  product_id BigInt
+  created_at DateTime @db.Timestamp(6)
+  updated_at DateTime @db.Timestamp(6)
+  users      users    @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rails_e40b042562")
+  products   products @relation(fields: [product_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rails_f01d097c12")
+
+  @@index([product_id], map: "index_suggestions_on_product_id")
+  @@index([user_id], map: "index_suggestions_on_user_id")
+}
+
+model tickets {
+  id         BigInt   @id @default(autoincrement())
+  status     Int?
+  message    String?
+  response   String?
+  user_id    BigInt
+  created_at DateTime @db.Timestamp(6)
+  updated_at DateTime @db.Timestamp(6)
+  subject    String?  @db.VarChar
+  users      users    @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rails_538a036fb9")
+
+  @@index([user_id], map: "index_tickets_on_user_id")
+}
+
+model user_reviews {
+  id                 BigInt   @id @default(autoincrement())
+  user_id            BigInt?
+  productor_id       BigInt?
+  message            String?
+  satisfaction_score Int?
+  created_at         DateTime @db.Timestamp(6)
+  updated_at         DateTime @db.Timestamp(6)
+
+  @@index([productor_id], map: "index_user_reviews_on_productor_id")
+  @@index([user_id], map: "index_user_reviews_on_user_id")
+}
+
+model users {
+  id                             BigInt            @id @default(autoincrement())
+  email                          String            @unique(map: "index_users_on_email") @default("") @db.VarChar
+  encrypted_password             String            @default("") @db.VarChar
+  reset_password_token           String?           @unique(map: "index_users_on_reset_password_token") @db.VarChar
+  reset_password_sent_at         DateTime?         @db.Timestamp(6)
+  remember_created_at            DateTime?         @db.Timestamp(6)
+  created_at                     DateTime          @db.Timestamp(6)
+  updated_at                     DateTime          @db.Timestamp(6)
+  name                           String?           @db.VarChar
+  cpf                            String?           @db.VarChar
+  phone_number                   String?           @db.VarChar
+  birth_date                     DateTime?         @db.Date
+  authentication_token           String?           @unique(map: "index_users_on_authentication_token") @db.VarChar(30)
+  isProductor                    Boolean?
+  isAdmin                        Boolean?
+  admin_role_id                  BigInt?
+  admin_roles                    admin_roles?      @relation(fields: [admin_role_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rails_aaee507b42")
+  addresses                      addresses[]
+  admins                         admins[]
+  blogs                          blogs[]
+  carts                          carts[]
+  chats_chats_atendent_idTousers chats[]           @relation("chats_atendent_idTousers")
+  chats_chats_user_idTousers     chats[]           @relation("chats_user_idTousers")
+  messages                       messages[]
+  productor_infos                productor_infos[]
+  products                       products[]
+  requests                       requests[]
+  service_clients                service_clients[]
+  services                       services[]
+  suggestions                    suggestions[]
+  tickets                        tickets[]
+  wish_lists                     wish_lists[]
+
+  @@index([admin_role_id], map: "index_users_on_admin_role_id")
+}
+
+model wish_lists {
+  id         BigInt   @id @default(autoincrement())
+  user_id    BigInt
+  product_id BigInt
+  created_at DateTime @db.Timestamp(6)
+  updated_at DateTime @db.Timestamp(6)
+  products   products @relation(fields: [product_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rails_158745247b")
+  users      users    @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rails_44fa60f908")
+
+  @@index([product_id], map: "index_wish_lists_on_product_id")
+  @@index([user_id], map: "index_wish_lists_on_user_id")
+}
+
+model admin_roles {
+  id          BigInt   @id @default(autoincrement())
+  name        String?  @unique(map: "index_admin_roles_on_name") @db.VarChar
+  permissions String[] @default([]) @db.VarChar
+  users       users[]
+}
